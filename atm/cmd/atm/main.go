@@ -33,10 +33,17 @@ func main() {
 	}
 	fmt.Println("===simulation start====")
 	//1. intert
-	fmt.Println("Insert Card...")
+	fmt.Println("==1.Insert Card...")
 	err = controller.InsertCard()
 	if err != nil {
 		fmt.Println("[Fail] Insert Card: ", err)
+		return
+	}
+	//2. pin 입력
+	fmt.Println("==2. Input Pin...")
+	err = controller.EnterPin("1234")
+	if err != nil {
+		fmt.Println("[Fail] Enter Pin: ", err)
 		return
 	}
 

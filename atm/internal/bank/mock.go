@@ -2,6 +2,7 @@ package bank
 
 import (
 	"atm/pkg/models"
+	"errors"
 	"fmt"
 	"sync"
 )
@@ -41,4 +42,33 @@ func (m *MockService) AddCard(cardNumber string, pin string, accounts []models.A
 		m.accounts[account.Number] = account
 	}
 	fmt.Println("Card added: ", cardNumber)
+}
+
+func (m *MockService) VerifyPin(cardNumber string, pin string) (bool, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	if _, ok := m.pins[cardNumber]; !ok {
+		return false, errors.New("[Bank] Card not found")
+	}
+	if m.pins[cardNumber] != pin {
+		return false, errors.New("[Bank] Invalid pin")
+	}
+	return true, nil
+}
+
+func (m *MockService) GetAccounts(cardNumber string) ([]models.Account, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	accounts, exists := m.cardAccounts[cardNumber]
+	if !exists {
+		return nil, errors.New("[Bank] Card not found")
+	}
+	results := make([]models.Account, len(accounts))
+	for i, account := range accounts {
+		results[i] = models.Account{
+			Number:  account.Number,
+			Balance: m.accountBalances[account.Number],
+		}
+	}
+	return results, nil
 }

@@ -14,8 +14,9 @@ type Controller struct {
 	bankService     bank.Service
 	hardwareService hardware.Service
 	//card, account
-	currentCard     *models.Card
-	selectedAccount *models.Account
+	currentCard       *models.Card
+	selectedAccount   *models.Account
+	availableAccounts []models.Account
 }
 
 func NewController(bankService bank.Service, hardwareService hardware.Service) *Controller {
@@ -44,5 +45,33 @@ func (c *Controller) InsertCard() error {
 	}
 	c.currentCard = card
 	fmt.Println("[Controller] Card inserted: ", card.Number)
+	return nil
+}
+
+func (c *Controller) EnterPin(pin string) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if c.currentCard == nil {
+		return errors.New("[Controller] No card inserted")
+	}
+	//verfy pin
+	valid, err := c.bankService.VerifyPin(c.currentCard.Number, pin)
+	if err != nil {
+		return err
+	}
+	if !valid {
+		return errors.New("[Controller] Invalid pin")
+	}
+	//get accounts
+	accounts, err := c.bankService.GetAccounts(c.currentCard.Number)
+	if err != nil {
+		return err
+	}
+	if len(accounts) == 0 {
+		return errors.New("[Controller] No accounts available")
+	}
+	c.availableAccounts = accounts
+	fmt.Println("[Controller] Accounts: ", accounts)
 	return nil
 }
