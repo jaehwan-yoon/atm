@@ -75,3 +75,17 @@ func (c *Controller) EnterPin(pin string) error {
 	fmt.Println("[Controller] Accounts: ", accounts)
 	return nil
 }
+
+func (c *Controller) GetAvailableAccounts() ([]models.Account, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if c.availableAccounts == nil {
+		return nil, errors.New("[Controller] No accounts available")
+	}
+	//return a depp copy
+	results := make([]models.Account, len(c.availableAccounts))
+	for i, account := range c.availableAccounts {
+		results[i] = account
+	}
+	return results, nil
+}

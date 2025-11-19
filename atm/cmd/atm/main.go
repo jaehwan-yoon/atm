@@ -39,12 +39,24 @@ func main() {
 		fmt.Println("[Fail] Insert Card: ", err)
 		return
 	}
-	//2. pin 입력
+	fmt.Println("=card inserted")
+	//2. pin pin
 	fmt.Println("==2. Input Pin...")
 	err = controller.EnterPin("1234")
 	if err != nil {
 		fmt.Println("[Fail] Enter Pin: ", err)
 		return
 	}
+	fmt.Println("=pin verified")
+	//3. accounts query
+	fmt.Println("==3. Query Accounts...")
+	availableAccounts, err := controller.GetAvailableAccounts()
+	if err != nil {
+		fmt.Println("[Fail] Query Accounts: ", err)
+		return
+	}
+	fmt.Println("=accounts queried: ", availableAccounts)
+	//4. accounts select
+	//5. transaction query
 
 }
