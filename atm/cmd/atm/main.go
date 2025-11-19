@@ -57,6 +57,47 @@ func main() {
 	}
 	fmt.Println("=accounts queried: ", availableAccounts)
 	//4. accounts select
-	//5. transaction query
+	fmt.Println("==4. Select Account...")
+	err = controller.SelectAccount("AC00002")
+	if err != nil {
+		fmt.Println("[Fail] Select Account: ", err)
+		return
+	}
+	fmt.Println("=account selected")
 
+	//5. balace check
+	fmt.Println("==5. Check Balance...")
+	balance, err := controller.CheckBalance()
+	if err != nil {
+		fmt.Println("[Fail] Check Balance: ", err)
+		return
+	}
+	fmt.Println("=balance checked: ", balance)
+
+	//6. deposit money
+	fmt.Println("==6. Deposit Money...")
+	err = controller.Deposit(10000)
+	if err != nil {
+		fmt.Println("[Fail] Deposit: ", err)
+		return
+	}
+	fmt.Println("=money deposited")
+
+	//7. balance check
+	fmt.Println("==7. Check Balance...")
+	balance, err = controller.CheckBalance()
+	if err != nil {
+		fmt.Println("[Fail] Check Balance: ", err)
+		return
+	}
+	fmt.Println("=balance checked: ", balance)
+
+	//8. withdraw money
+	fmt.Println("==8. Withdraw Money...")
+	err = controller.Withdraw(30000)
+	if err != nil {
+		fmt.Println("[Fail] Withdraw: ", err)
+		return
+	}
+	fmt.Println("=money withdrawn")
 }

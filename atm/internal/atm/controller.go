@@ -89,3 +89,95 @@ func (c *Controller) GetAvailableAccounts() ([]models.Account, error) {
 	}
 	return results, nil
 }
+
+func (c *Controller) SelectAccount(accountNumber string) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.selectedAccount != nil {
+		return errors.New("[Controller] Account already selected")
+	}
+	//find account
+	for _, account := range c.availableAccounts {
+		if account.Number == accountNumber {
+			c.selectedAccount = &account
+			//hardware set available cash
+			err := c.hardwareService.SetAvailableCash(account.Balance)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+
+	return errors.New("[Controller] Account not found")
+}
+
+func (c *Controller) CheckBalance() (int, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if c.selectedAccount == nil {
+		return 0, errors.New("[Controller] No account selected")
+	}
+	balance, err := c.bankService.GetBalance(c.selectedAccount.Number)
+	if err != nil {
+		return 0, err
+	}
+	c.selectedAccount.Balance = balance
+	return balance, nil
+}
+
+func (c *Controller) Deposit(amount int) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if amount <= 0 {
+		return errors.New("[Controller] Invalid amount")
+	}
+	if c.selectedAccount == nil {
+		return errors.New("[Controller] No account selected")
+	}
+	//accept cash from hardware
+	err := c.hardwareService.AcceptCash(amount)
+	if err != nil {
+		return err
+	}
+	//deposit to bank
+	err = c.bankService.Deposit(c.selectedAccount.Number, amount)
+	if err != nil {
+		return err
+	}
+	//update local account balance
+	return nil
+}
+
+func (c *Controller) Withdraw(amount int) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if amount <= 0 {
+		return errors.New("[Controller] Invalid amount")
+	}
+	if c.selectedAccount == nil {
+		return errors.New("[Controller] No account selected")
+	}
+
+	//withdraw from bank first
+	err := c.bankService.Withdraw(c.selectedAccount.Number, amount)
+	if err != nil {
+		return err
+	}
+	//dispense cash from hardware
+	err = c.hardwareService.DispenseCash(amount)
+	if err != nil {
+		//todo: add rollback when dispense fails
+		return err
+	}
+
+	//update local account balance
+	balance, err := c.bankService.GetBalance(c.selectedAccount.Number)
+	if err != nil {
+		fmt.Println("[Controller] Get balance failed: ", err)
+		return err
+	}
+	c.selectedAccount.Balance = balance
+	fmt.Println("[Controller] Withdraw accountNumber: ", c.selectedAccount.Number, ", withdraw amount: ", amount, ", new balance: ", balance)
+	return nil
+}

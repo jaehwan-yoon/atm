@@ -72,3 +72,46 @@ func (m *MockService) GetAccounts(cardNumber string) ([]models.Account, error) {
 	}
 	return results, nil
 }
+
+func (m *MockService) GetBalance(accountNumber string) (int, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	balance, exists := m.accountBalances[accountNumber]
+	if !exists {
+		return 0, errors.New("[Bank] Account not found")
+	}
+	return balance, nil
+}
+
+func (m *MockService) Deposit(accountNumber string, amount int) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if amount <= 0 {
+		return errors.New("[Bank] Invalid amount")
+	}
+	balance, exists := m.accountBalances[accountNumber]
+	if !exists {
+		return errors.New(fmt.Sprintf("[Bank] Account not found: %s", accountNumber))
+	}
+	m.accountBalances[accountNumber] = balance + amount
+	fmt.Println("[Bank] Deposit accountNumber: ", accountNumber, ", deposit amount: ", amount, ", new balance: ", balance+amount)
+	return nil
+}
+
+func (m *MockService) Withdraw(accountNumber string, amount int) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if amount <= 0 {
+		return errors.New("[Bank] Invalid amount")
+	}
+	balance, exists := m.accountBalances[accountNumber]
+	if !exists {
+		return errors.New(fmt.Sprintf("[Bank] Account not found: %s", accountNumber))
+	}
+	if balance < amount {
+		return errors.New(fmt.Sprintf("[Bank] Insufficient balance: %s", accountNumber))
+	}
+	m.accountBalances[accountNumber] = balance - amount
+	fmt.Println("[Bank] Withdraw accountNumber: ", accountNumber, ", withdraw amount: ", amount, ", new balance: ", balance-amount)
+	return nil
+}
