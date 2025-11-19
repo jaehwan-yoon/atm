@@ -7,4 +7,5 @@ type Service interface {
 	AcceptCash(amount int) error
 	DispenseCash(amount int) error
 	SetAvailableCash(amount int) error
+	EjectCard() error
 }

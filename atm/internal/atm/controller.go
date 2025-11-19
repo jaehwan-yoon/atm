@@ -181,3 +181,21 @@ func (c *Controller) Withdraw(amount int) error {
 	fmt.Println("[Controller] Withdraw accountNumber: ", c.selectedAccount.Number, ", withdraw amount: ", amount, ", new balance: ", balance)
 	return nil
 }
+
+func (c *Controller) EjectCard() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.currentCard == nil {
+		return errors.New("[Controller] No card inserted")
+	}
+	//hardware eject card
+	err := c.hardwareService.EjectCard()
+	if err != nil {
+		return err
+	}
+	c.currentCard = nil
+	c.selectedAccount = nil
+	c.availableAccounts = nil
+	fmt.Println("[Controller] Card ejected")
+	return nil
+}

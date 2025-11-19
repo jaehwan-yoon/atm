@@ -74,3 +74,12 @@ func (m *MockService) SetAvailableCash(amount int) error {
 	fmt.Println("[Hardware] Available cash set: ", amount)
 	return nil
 }
+
+func (m *MockService) EjectCard() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.CurrentCard = nil
+	m.availableCash = 0
+	fmt.Println("[Hardware] Card ejected")
+	return nil
+}

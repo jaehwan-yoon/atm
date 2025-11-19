@@ -100,4 +100,25 @@ func main() {
 		return
 	}
 	fmt.Println("=money withdrawn")
+
+	//9. balance check
+	fmt.Println("==9. Check Balance...")
+	balance, err = controller.CheckBalance()
+	if err != nil {
+		fmt.Println("[Fail] Check Balance: ", err)
+		return
+	}
+	fmt.Println("=balance checked: ", balance)
+
+	//10. eject card
+	fmt.Println("==10. Eject Card...")
+	err = controller.EjectCard()
+	if err != nil {
+		fmt.Println("[Fail] Eject Card: ", err)
+		return
+	}
+	fmt.Println("=card ejected")
+
+	fmt.Println("===simulation end====")
+
 }
