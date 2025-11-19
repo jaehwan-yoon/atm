@@ -2,6 +2,7 @@ package bank
 
 import (
 	"atm/pkg/models"
+	"fmt"
 	"sync"
 )
 
@@ -39,4 +40,5 @@ func (m *MockService) AddCard(cardNumber string, pin string, accounts []models.A
 		m.accountBalances[account.Number] = account.Balance
 		m.accounts[account.Number] = account
 	}
+	fmt.Println("Card added: ", cardNumber)
 }
