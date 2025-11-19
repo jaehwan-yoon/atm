@@ -1,12 +1,13 @@
 package atm
 
 import (
+	"atm/internal/bank"
 	"atm/pkg/models"
 	"fmt"
 )
 
 type Controller struct {
-
+	bankService bank.Service
 	//card, account
 	currentCard     models.Card
 	selectedAccount models.Account
@@ -14,7 +15,9 @@ type Controller struct {
 
 func NewController() *Controller {
 	fmt.Println("NewController init")
-	return &Controller{}
+	return &Controller{
+		bankService: bank.NewMockService(),
+	}
 }
 
 func (c *Controller) IsReadyAtmController(controller *Controller) error {
